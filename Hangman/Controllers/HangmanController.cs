@@ -20,12 +20,12 @@ namespace Hangman.Controllers
 
     public void Start()
     {
-      DisplayGameStart();
-
       var generateWordService = new GenerateWordFromFile(WordsFilename);
       var word = generateWordService.Run();
 
       _game.SetWord(word);
+
+      DisplayGameStart();
 
       while (_game.IsInPlay())
       {
