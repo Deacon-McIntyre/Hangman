@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using Hangman.Models;
 
 namespace Hangman.Views
@@ -26,29 +27,26 @@ namespace Hangman.Views
     public void DisplayGameState()
     {
       var guessesRemaining = _game.GetGuessesRemaining();
-      var target = _game.GetWord();
+      var answer = _game.GetWord();
       var guessesSoFar = _game.GetGuesses();
 
-      foreach (var character in target)
+      var stringBuilder = new StringBuilder();
+
+      foreach (var character in answer)
       {
-        if (guessesSoFar.Contains(character))
-        {
-          Console.Write(character);
-        }
-        else
-        {
-          Console.Write("_");
-        }
+        stringBuilder.Append(guessesSoFar.Contains(character) ? character : '_');
       }
 
-      var guessesSoFarString = string.Join(", ", guessesSoFar.Except(target));
-      Console.Write($"   You have {guessesRemaining} lives left");
-      if (!string.IsNullOrEmpty(guessesSoFarString))
+      stringBuilder.Append($" | You have {guessesRemaining} lives left");
+
+      var incorrectGuesses = string.Join(", ", guessesSoFar.Except(answer));
+
+      if (!string.IsNullOrEmpty(incorrectGuesses))
       {
-        Console.Write($". Incorrect guesses so far: {guessesSoFarString}");
+        stringBuilder.Append($" | Incorrect guesses so far: {incorrectGuesses}");
       }
 
-      Console.WriteLine();
+      Console.WriteLine(stringBuilder.ToString());
     }
 
     public string AskForGuess()
