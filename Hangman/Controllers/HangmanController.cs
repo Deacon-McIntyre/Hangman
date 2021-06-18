@@ -1,11 +1,14 @@
 ﻿using System;
 using Hangman.Models;
+using Hangman.Services;
 using Hangman.Views;
 
 namespace Hangman.Controllers
 {
   public class HangmanController
   {
+    private const string WordsFilename = "words_alpha.txt";
+
     private readonly View _view;
     private readonly Game _game;
 
@@ -17,35 +20,48 @@ namespace Hangman.Controllers
 
     public void Start()
     {
-      _view.Welcome();
-      _view.DisplayInstructions();
-      _view.DisplayGameState();
+      DisplayGameStart();
 
-      _game.GenerateWord();
+      var generateWordService = new GenerateWordFromFile(WordsFilename);
+      var word = generateWordService.Run();
+
+      _game.SetWord(word);
 
       while (_game.IsInPlay())
       {
-        var guess = _view.AskForGuess();
-        var result = _game.IsValidGuess(guess, out char guessCharacter);
-        switch (result)
-        {
-          case GuessResult.Valid:
-            _game.SubmitGuess(guessCharacter);
-            break;
-          case GuessResult.Invalid:
-            _view.DisplayInvalidGuess();
-            break;
-          case GuessResult.Duplicate:
-            _view.DisplayDuplicateGuess();
-            break;
-          default:
-            throw new ArgumentOutOfRangeException();
-        }
-
-        _view.DisplayGameState();
+        PlayTurn();
       }
 
       _view.DisplayGameOutcome();
+    }
+
+    private void DisplayGameStart()
+    {
+      _view.DisplayWelcomeMessage();
+      _view.DisplayInstructions();
+      _view.DisplayGameState();
+    }
+
+    private void PlayTurn()
+    {
+      var guess = _view.AskForGuess();
+      var result = _game.IsValidGuess(guess, out char guessCharacter);
+      switch (result)
+      {
+        case GuessResult.Valid:
+          _game.SubmitGuess(guessCharacter);
+          break;
+        case GuessResult.Invalid:
+          _view.DisplayInvalidGuess();
+          break;
+        case GuessResult.Duplicate:
+          _view.DisplayDuplicateGuess();
+          break;
+        default:
+          throw new ArgumentOutOfRangeException();
+      }
+
+      _view.DisplayGameState();
     }
   }
 }

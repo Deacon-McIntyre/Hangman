@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace Hangman.Models
@@ -16,16 +15,14 @@ namespace Hangman.Models
       _guesses = new HashSet<char>();
     }
 
-    public void GenerateWord()
-    {
-      string[] lines = File.ReadAllLines("words_alpha.txt");
-      var rand = new Random();
-      _word = lines[rand.Next(0, lines.Length)];
-    }
-
     public string GetWord()
     {
       return _word;
+    }
+
+    public void SetWord(string word)
+    {
+      _word = word;
     }
 
     public bool IsWon()

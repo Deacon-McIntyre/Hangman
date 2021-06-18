@@ -13,7 +13,7 @@ namespace Hangman.Views
       _game = game;
     }
 
-    public void Welcome()
+    public void DisplayWelcomeMessage()
     {
       Console.WriteLine("Welcome to Hangman!");
     }
@@ -28,6 +28,7 @@ namespace Hangman.Views
       var guessesRemaining = _game.GetGuessesRemaining();
       var target = _game.GetWord();
       var guessesSoFar = _game.GetGuesses();
+
       foreach (var character in target)
       {
         if (guessesSoFar.Contains(character))
