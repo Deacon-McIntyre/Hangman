@@ -9,22 +9,22 @@ namespace Hangman.Controllers
   {
     private const string WordsFilename = "words_alpha.txt";
 
-    private readonly View _view;
-    private readonly Game _game;
+    private View _view;
+    private Game _game;
 
-    public HangmanController(Game game, View view)
+    public void Initialise()
     {
-      _game = game;
-      _view = view;
-    }
+      _game = new Game();
+      _view = new View(_game);
 
-    public void Start()
-    {
       var generateWordService = new GenerateWordFromFile(WordsFilename);
       var word = generateWordService.Run();
 
       _game.SetWord(word);
+    }
 
+    public void Start()
+    {
       DisplayGameStart();
 
       while (_game.IsInPlay())
