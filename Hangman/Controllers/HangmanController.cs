@@ -31,43 +31,33 @@ namespace Hangman.Controllers
     {
       if (!_initialised) throw new InvalidOperationException("Hangman controller must be initialised before starting");
 
-      DisplayGameStart();
-
-      while (_game.IsInPlay())
-      {
-        PlayTurn();
-      }
-
-      _view.DisplayGameOutcome();
-    }
-
-    private void DisplayGameStart()
-    {
       _view.DisplayWelcomeMessage();
       _view.DisplayInstructions();
       _view.DisplayGameState();
-    }
 
-    private void PlayTurn()
-    {
-      var guess = _view.AskForGuess();
-      var result = _game.IsValidGuess(guess, out char guessCharacter);
-      switch (result)
+      while (_game.IsInPlay())
       {
-        case GuessResult.Valid:
-          _game.SubmitGuess(guessCharacter);
-          break;
-        case GuessResult.Invalid:
-          _view.DisplayInvalidGuess();
-          break;
-        case GuessResult.Duplicate:
-          _view.DisplayDuplicateGuess();
-          break;
-        default:
-          throw new ArgumentOutOfRangeException();
+        var guess = _view.AskForGuess();
+        var result = _game.IsValidGuess(guess, out char guessCharacter);
+        switch (result)
+        {
+          case GuessResult.Valid:
+            _game.SubmitGuess(guessCharacter);
+            break;
+          case GuessResult.Invalid:
+            _view.DisplayInvalidGuess();
+            break;
+          case GuessResult.Duplicate:
+            _view.DisplayDuplicateGuess();
+            break;
+          default:
+            throw new ArgumentOutOfRangeException();
+        }
+
+        _view.DisplayGameState();
       }
 
-      _view.DisplayGameState();
+      _view.DisplayGameOutcome();
     }
   }
 }
