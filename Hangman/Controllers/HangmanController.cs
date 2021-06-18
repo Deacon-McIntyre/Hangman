@@ -12,6 +12,8 @@ namespace Hangman.Controllers
     private View _view;
     private Game _game;
 
+    private bool _initialised;
+
     public void Initialise()
     {
       _game = new Game();
@@ -21,10 +23,14 @@ namespace Hangman.Controllers
       var word = generateWordService.Run();
 
       _game.SetWord(word);
+
+      _initialised = true;
     }
 
     public void Start()
     {
+      if (!_initialised) throw new InvalidOperationException("Hangman controller must be initialised before starting");
+
       DisplayGameStart();
 
       while (_game.IsInPlay())
