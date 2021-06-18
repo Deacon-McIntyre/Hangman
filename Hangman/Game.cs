@@ -7,7 +7,7 @@ namespace Hangman
   public class Game
   {
     private const int MaxLives = 7;
-    private string _word = "pig";
+    private string _word;
     private readonly HashSet<char> _guesses;
 
     public Game()
@@ -72,7 +72,8 @@ namespace Hangman
           invalidCount++;
         }
       }
-      return Math.Max(0, MaxLives-invalidCount);
+
+      return Math.Max(0, MaxLives - invalidCount);
     }
 
     public HashSet<char> GetGuesses()

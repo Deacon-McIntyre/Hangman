@@ -15,10 +15,12 @@ namespace Hangman
 
     public void Start()
     {
-      _game.GenerateWord();
       _view.Welcome();
       _view.DisplayInstructions();
       _view.DisplayGameState();
+
+      _game.GenerateWord();
+
       while (_game.IsInPlay())
       {
         var guess = _view.AskForGuess();
@@ -37,8 +39,10 @@ namespace Hangman
           default:
             throw new ArgumentOutOfRangeException();
         }
+
         _view.DisplayGameState();
       }
+
       _view.DisplayGameOutcome();
     }
   }

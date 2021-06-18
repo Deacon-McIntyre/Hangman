@@ -6,6 +6,7 @@ namespace Hangman
   public class View
   {
     private readonly Game _game;
+
     public View(Game game)
     {
       _game = game;
@@ -44,8 +45,7 @@ namespace Hangman
       {
         Console.Write($". Incorrect guesses so far: {guessesSoFarString}");
       }
-      
-      
+
       Console.WriteLine();
     }
 
@@ -62,11 +62,12 @@ namespace Hangman
 
     public void DisplayGameOutcome()
     {
-      if(_game.IsWon())
+      if (_game.IsWon())
       {
         Console.WriteLine("You won!");
       }
-      if(_game.IsLost())
+
+      if (_game.IsLost())
       {
         Console.WriteLine("You lost :(");
         Console.WriteLine($"The word was {_game.GetWord()}");
