@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
-namespace Hangman
+namespace Hangman.Models
 {
   public class Game
   {
@@ -17,7 +18,7 @@ namespace Hangman
 
     public void GenerateWord()
     {
-      string[] lines = System.IO.File.ReadAllLines("words_alpha.txt");
+      string[] lines = File.ReadAllLines("words_alpha.txt");
       var rand = new Random();
       _word = lines[rand.Next(0, lines.Length)];
     }

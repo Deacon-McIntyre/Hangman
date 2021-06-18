@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Hangman.Controllers;
+using Hangman.Models;
+using Hangman.Views;
 
 namespace Hangman
 {

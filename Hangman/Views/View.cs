@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
+using Hangman.Models;
 
-namespace Hangman
+namespace Hangman.Views
 {
   public class View
   {

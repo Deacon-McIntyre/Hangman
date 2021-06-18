@@ -1,6 +1,8 @@
 ﻿using System;
+using Hangman.Models;
+using Hangman.Views;
 
-namespace Hangman
+namespace Hangman.Controllers
 {
   public class HangmanController
   {
