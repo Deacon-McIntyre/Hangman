@@ -1,27 +1,39 @@
 ﻿using System;
 using Hangman.Models;
+using Hangman.Services;
 using Hangman.Views;
 
 namespace Hangman.Controllers
 {
   public class HangmanController
   {
-    private readonly View _view;
-    private readonly Game _game;
+    private const string WordsFilename = "words_alpha.txt";
 
-    public HangmanController(Game game, View view)
+    private View _view;
+    private Game _game;
+
+    private bool _initialised;
+
+    public void Initialise()
     {
-      _game = game;
-      _view = view;
+      _game = new Game();
+      _view = new View(_game);
+
+      var generateWordService = new GenerateWordFromFile(WordsFilename);
+      var word = generateWordService.Run();
+
+      _game.SetWord(word);
+
+      _initialised = true;
     }
 
     public void Start()
     {
-      _view.Welcome();
+      if (!_initialised) throw new InvalidOperationException("Hangman controller must be initialised before starting");
+
+      _view.DisplayWelcomeMessage();
       _view.DisplayInstructions();
       _view.DisplayGameState();
-
-      _game.GenerateWord();
 
       while (_game.IsInPlay())
       {

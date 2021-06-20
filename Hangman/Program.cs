@@ -1,6 +1,4 @@
 ﻿using Hangman.Controllers;
-using Hangman.Models;
-using Hangman.Views;
 
 namespace Hangman
 {
@@ -8,8 +6,8 @@ namespace Hangman
   {
     static void Main(string[] args)
     {
-      var game = new Game();
-      var controller = new HangmanController(game, new View(game));
+      var controller = new HangmanController();
+      controller.Initialise();
       controller.Start();
     }
   }
