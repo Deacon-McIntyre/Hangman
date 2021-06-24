@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Hangman.Models
 {
-  public class Game
+  public class Game : BasePersistableGame
   {
     private const int MaxLives = 7;
     private string _word;
@@ -58,6 +58,20 @@ namespace Hangman.Models
     {
       var lowercaseGuess = char.ToLower(guess);
       _guesses.Add(lowercaseGuess);
+
+      var saveModel = new SaveModel()
+      {
+        TargetWord = _word,
+        Guesses = _guesses
+      };
+
+      Save(saveModel);
+    }
+
+    protected override void Load(SaveModel state)
+    {
+      _word = state.TargetWord;
+      _guesses.UnionWith(state.Guesses);
     }
 
     public int GetGuessesRemaining()

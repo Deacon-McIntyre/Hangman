@@ -24,6 +24,8 @@ namespace Hangman.Controllers
 
       _game.SetWord(word);
 
+      _game.Load();
+
       _initialised = true;
     }
 
