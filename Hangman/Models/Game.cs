@@ -4,30 +4,39 @@ using System.Linq;
 
 namespace Hangman.Models
 {
-  public class Game : BasePersistableGame
+  public class Game : BasePersistable
   {
     private const int MaxLives = 7;
-    private string _word;
-    private readonly HashSet<char> _guesses;
+    private string _targetWord;
+    private HashSet<char> _guesses;
 
-    public Game()
+    public Game(string targetWord)
     {
+      _targetWord = targetWord;
+
       _guesses = new HashSet<char>();
+    }
+
+    public string TargetWord
+    {
+      get { return _targetWord; }
+      set { _targetWord = value; }
+    }
+
+    public IEnumerable<char> Guesses
+    {
+      get { return new List<char>(_guesses);}
+      set { _guesses = new HashSet<char>(value);}
     }
 
     public string GetWord()
     {
-      return _word;
-    }
-
-    public void SetWord(string word)
-    {
-      _word = word;
+      return _targetWord;
     }
 
     public bool IsWon()
     {
-      return _word.All(character => _guesses.Contains(character));
+      return _targetWord.All(character => _guesses.Contains(character));
     }
 
     public bool IsLost()
@@ -59,19 +68,7 @@ namespace Hangman.Models
       var lowercaseGuess = char.ToLower(guess);
       _guesses.Add(lowercaseGuess);
 
-      var saveModel = new SaveModel()
-      {
-        TargetWord = _word,
-        Guesses = _guesses
-      };
-
-      Save(saveModel);
-    }
-
-    protected override void Load(SaveModel state)
-    {
-      _word = state.TargetWord;
-      _guesses.UnionWith(state.Guesses);
+      Save();
     }
 
     public int GetGuessesRemaining()
@@ -79,7 +76,7 @@ namespace Hangman.Models
       var invalidCount = 0;
       foreach (var guess in _guesses)
       {
-        if (!_word.Contains(guess))
+        if (!_targetWord.Contains(guess))
         {
           invalidCount++;
         }

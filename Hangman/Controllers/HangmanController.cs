@@ -16,15 +16,17 @@ namespace Hangman.Controllers
 
     public void Initialise()
     {
-      _game = new Game();
+      _game = Game.Load<Game>();
+
+      if (_game == null)
+      {
+        var generateWordService = new GenerateWordFromFile(WordsFilename);
+        var targetWord = generateWordService.Run();
+
+        _game = new Game(targetWord);
+      }
+
       _view = new View(_game);
-
-      var generateWordService = new GenerateWordFromFile(WordsFilename);
-      var word = generateWordService.Run();
-
-      _game.SetWord(word);
-
-      _game.Load();
 
       _initialised = true;
     }
@@ -37,7 +39,7 @@ namespace Hangman.Controllers
       _view.DisplayInstructions();
       _view.DisplayGameState();
 
-      while (_game.IsInPlay())
+      if (_game.IsInPlay())
       {
         var guess = _view.AskForGuess();
         var result = _game.IsValidGuess(guess, out char guessCharacter);
