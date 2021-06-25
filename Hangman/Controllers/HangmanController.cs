@@ -12,30 +12,43 @@ namespace Hangman.Controllers
     private View _view;
     private Game _game;
 
-    private bool _initialised;
-
-    public void Initialise()
+    private void Initialise()
     {
-      _game = new Game();
+      _game = Game.LoadExistingGame();
+      
+      if (_game == null)
+      {
+        var generateWordService = new GenerateWordFromFile(WordsFilename);
+        var targetWord = generateWordService.Run();
+
+        _game = new Game(targetWord);
+        _game.HandlePersistence();
+      }
+
       _view = new View(_game);
-
-      var generateWordService = new GenerateWordFromFile(WordsFilename);
-      var word = generateWordService.Run();
-
-      _game.SetWord(word);
-
-      _initialised = true;
     }
 
-    public void Start()
+    public void Run()
     {
-      if (!_initialised) throw new InvalidOperationException("Hangman controller must be initialised before starting");
+      Initialise();
 
       _view.DisplayWelcomeMessage();
       _view.DisplayInstructions();
       _view.DisplayGameState();
 
-      while (_game.IsInPlay())
+      if (_game.IsInPlay())
+      {
+        PerformMove();
+      }
+
+      _view.DisplayGameOutcome();
+      _game.HandlePersistence();
+    }
+
+    private void PerformMove()
+    {
+      var hasValidGuess = false;
+      while (!hasValidGuess)
       {
         var guess = _view.AskForGuess();
         var result = _game.IsValidGuess(guess, out char guessCharacter);
@@ -43,6 +56,9 @@ namespace Hangman.Controllers
         {
           case GuessResult.Valid:
             _game.SubmitGuess(guessCharacter);
+            _view.DisplayGameState();
+
+            hasValidGuess = true;
             break;
           case GuessResult.Invalid:
             _view.DisplayInvalidGuess();
@@ -53,11 +69,7 @@ namespace Hangman.Controllers
           default:
             throw new ArgumentOutOfRangeException();
         }
-
-        _view.DisplayGameState();
       }
-
-      _view.DisplayGameOutcome();
     }
   }
 }

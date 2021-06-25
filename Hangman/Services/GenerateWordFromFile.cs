@@ -14,7 +14,17 @@ namespace Hangman.Services
 
     public string Run()
     {
-      string[] lines = File.ReadAllLines(_fileName);
+      string[] lines;
+
+      try
+      {
+        lines = File.ReadAllLines(_fileName);
+      }
+      catch (Exception ex)
+      {
+        throw new InvalidOperationException($"Unable to read the words from the {_fileName} file", ex);
+      }
+
       var rand = new Random();
 
       return lines[rand.Next(0, lines.Length)];

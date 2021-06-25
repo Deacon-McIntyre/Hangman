@@ -27,14 +27,16 @@ namespace Hangman.Views
     public void DisplayGameState()
     {
       var guessesRemaining = _game.GetGuessesRemaining();
-      var answer = _game.GetWord();
+      var answer = _game.GetTargetWord();
       var guessesSoFar = _game.GetGuesses();
 
       var stringBuilder = new StringBuilder();
 
-      foreach (var character in answer)
+      var filledOutAnswer = _game.GetFilledOutAnswer();
+
+      foreach (var character in filledOutAnswer)
       {
-        stringBuilder.Append(guessesSoFar.Contains(character) ? character : '_');
+        stringBuilder.Append(character != default ? character : '_');
       }
 
       stringBuilder.Append($" | You have {guessesRemaining} lives left");
@@ -70,7 +72,7 @@ namespace Hangman.Views
       if (_game.IsLost())
       {
         Console.WriteLine("You lost :(");
-        Console.WriteLine($"The word was {_game.GetWord()}");
+        Console.WriteLine($"The word was {_game.GetTargetWord()}");
       }
     }
 
