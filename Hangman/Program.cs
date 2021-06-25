@@ -7,8 +7,7 @@ namespace Hangman
     static void Main(string[] args)
     {
       var controller = new HangmanController();
-      controller.Initialise();
-      controller.Start();
+      controller.Run();
     }
   }
 }
