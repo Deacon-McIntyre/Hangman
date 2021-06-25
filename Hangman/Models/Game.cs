@@ -7,41 +7,37 @@ namespace Hangman.Models
   public class Game : BasePersistable
   {
     private const int MaxLives = 7;
-    private string _targetWord;
-    private HashSet<char> _guesses;
+
+    private HashSet<Guess> _guesses;
 
     public Game(string targetWord)
     {
-      _targetWord = targetWord;
+      TargetWord = targetWord;
 
-      _guesses = new HashSet<char>();
+      _guesses = new HashSet<Guess>();
     }
 
-    public string TargetWord
-    {
-      get { return _targetWord; }
-      set { _targetWord = value; }
-    }
+    public string TargetWord { get; set; }
 
-    public IEnumerable<char> Guesses
+    public IEnumerable<Guess> Guesses
     {
-      get { return new List<char>(_guesses);}
-      set { _guesses = new HashSet<char>(value);}
+      get => new List<Guess>(_guesses);
+      set => _guesses = new HashSet<Guess>(value);
     }
 
     public string GetWord()
     {
-      return _targetWord;
+      return TargetWord;
     }
 
     public bool IsWon()
     {
-      return _targetWord.All(character => _guesses.Contains(character));
+      return TargetWord.All(character => _guesses.Any(g => g.Character == character));
     }
 
     public bool IsLost()
     {
-      return !IsWon() && GetGuessesRemaining() == 0;
+      return GetGuessesRemaining() == 0;
     }
 
     public bool IsInPlay()
@@ -49,43 +45,31 @@ namespace Hangman.Models
       return !IsWon() && !IsLost();
     }
 
-    public GuessResult IsValidGuess(string guess, out char validChar)
+    public bool HasAlreadyBeenGuessed(Guess guess)
     {
-      if (char.TryParse(guess, out var guessChar) && char.IsLetter(guessChar))
-      {
-        validChar = guessChar;
-        return _guesses.Contains(guessChar) ? GuessResult.Duplicate : GuessResult.Valid;
-      }
-      else
-      {
-        validChar = default;
-        return GuessResult.Invalid;
-      }
+      return _guesses.Any(g => g.Character == guess.Character);
     }
 
-    public void SubmitGuess(char guess)
+    public void SubmitGuess(Guess guess)
     {
-      var lowercaseGuess = char.ToLower(guess);
-      _guesses.Add(lowercaseGuess);
+      _guesses.Add(guess);
 
       Save();
     }
 
     public int GetGuessesRemaining()
     {
-      var invalidCount = 0;
-      foreach (var guess in _guesses)
-      {
-        if (!_targetWord.Contains(guess))
-        {
-          invalidCount++;
-        }
-      }
+      var invalidCount = _guesses.Count(g => !TargetWord.Contains(g.Character));
 
       return Math.Max(0, MaxLives - invalidCount);
     }
 
-    public HashSet<char> GetGuesses()
+    public IEnumerable<Guess> GetInvalidGuesses()
+    {
+      return _guesses.Where(g => !TargetWord.Contains(g.Character));
+    }
+
+    public HashSet<Guess> GetGuesses()
     {
       return _guesses;
     }

@@ -17,7 +17,7 @@ namespace Hangman.Services
       string[] lines = File.ReadAllLines(_fileName);
       var rand = new Random();
 
-      return lines[rand.Next(0, lines.Length)];
+      return lines[rand.Next(0, lines.Length)].ToUpper();
     }
   }
 }

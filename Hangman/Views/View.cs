@@ -34,12 +34,12 @@ namespace Hangman.Views
 
       foreach (var character in answer)
       {
-        stringBuilder.Append(guessesSoFar.Contains(character) ? character : '_');
+        stringBuilder.Append(guessesSoFar.Any(g => g.Character == character) ? character : '_');
       }
 
       stringBuilder.Append($" | You have {guessesRemaining} lives left");
 
-      var incorrectGuesses = string.Join(", ", guessesSoFar.Except(answer));
+      var incorrectGuesses = string.Join(", ",  _game.GetInvalidGuesses().Select(g => g.Character));
 
       if (!string.IsNullOrEmpty(incorrectGuesses))
       {
@@ -49,10 +49,12 @@ namespace Hangman.Views
       Console.WriteLine(stringBuilder.ToString());
     }
 
-    public string AskForGuess()
+    public Guess AskForGuess()
     {
       Console.WriteLine("Guess a character: ");
-      return Console.ReadLine();
+      char character = Console.ReadKey(true).KeyChar;
+
+      return new Guess(character);
     }
 
     public void DisplayInvalidGuess()
