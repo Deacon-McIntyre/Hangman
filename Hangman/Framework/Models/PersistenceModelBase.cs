@@ -1,32 +1,31 @@
-﻿using System;
-using System.IO;
-using System.Text.Json;
+﻿using System.IO;
+using Newtonsoft.Json;
 
 namespace Hangman.Framework.Models
 {
-  public class PersistenceModelBase
+  public abstract class PersistenceModelBase
   {
-    protected void Save<T>(T obj)
+    protected void Save()
     {
-      var serializedModel = JsonSerializer.Serialize(obj);
+      var serializedModel = JsonConvert.SerializeObject(this);
       
       File.WriteAllText(Constants.PersistenceFilePath, serializedModel);
     }
 
-    protected static T Load<T>()
+    protected static T Load<T>() where T : PersistenceModelBase
     {
       T result = default;
 
       if (!File.Exists(Constants.PersistenceFilePath))
       {
-        return default;
+        return null;
       }
 
       var str = File.ReadAllText(Constants.PersistenceFilePath);
 
       try
       {
-        result = JsonSerializer.Deserialize<T>(str);
+        result = JsonConvert.DeserializeObject<T>(str);
       }
       catch
       {
@@ -36,7 +35,7 @@ namespace Hangman.Framework.Models
       return result;
     }
 
-    protected void Reset()
+    protected static void Reset()
     {
       File.Delete(Constants.PersistenceFilePath);
     }

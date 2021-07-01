@@ -105,7 +105,7 @@ namespace Hangman.Models
       }
       else
       {
-        Save(this);
+        Save();
       }
     }
 
