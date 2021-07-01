@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Hangman.Framework.Models;
 
 namespace Hangman.Models
 {
@@ -25,7 +26,7 @@ namespace Hangman.Models
       set => _guesses = new HashSet<Guess>(value);
     }
 
-    public string GetWord()
+    public string GetTargetWord()
     {
       return TargetWord;
     }
@@ -53,15 +54,26 @@ namespace Hangman.Models
     public void SubmitGuess(Guess guess)
     {
       _guesses.Add(guess);
-
-      Save();
     }
 
     public int GetGuessesRemaining()
     {
       var invalidCount = _guesses.Count(g => !TargetWord.Contains(g.Character));
 
-      return Math.Max(0, MaxLives - invalidCount);
+      return MaxLives - invalidCount;
+    }
+    
+    public char[] GetFilledOutAnswer()
+    {
+      var result = new char[TargetWord.Length];
+      for (var i = 0; i < TargetWord.Length; i++)
+      {
+        var letter = TargetWord[i];
+
+        result[i] = Guesses.Select(g => g.Character).Contains(letter) ? letter : default;
+      }
+
+      return result;
     }
 
     public IEnumerable<Guess> GetInvalidGuesses()
@@ -69,9 +81,21 @@ namespace Hangman.Models
       return _guesses.Where(g => !TargetWord.Contains(g.Character));
     }
 
-    public HashSet<Guess> GetGuesses()
+    public void HandlePersistence()
     {
-      return _guesses;
+      if (!IsInPlay())
+      {
+        Reset();
+      }
+      else
+      {
+        Save();
+      }
+    }
+
+    public static Game LoadExisting()
+    {
+      return Load<Game>();
     }
   }
 }

@@ -1,4 +1,5 @@
-﻿using Hangman.Models;
+﻿using System.Linq;
+using Hangman.Models;
 using NUnit.Framework;
 
 namespace Hangman.Tests.Models
@@ -10,7 +11,7 @@ namespace Hangman.Tests.Models
     [SetUp]
     public void Setup()
     {
-      _game = new Game();
+      _game = new Game("PIG");
     }
     
     [Test]
@@ -23,32 +24,30 @@ namespace Hangman.Tests.Models
     [Test]
     public void GetWord_WordIsPig_ReturnsPig()
     {
-      _game.SetWord("pig");
-      var word = _game.GetWord();
-      Assert.That(word, Is.EqualTo("pig"));
+      var word = _game.GetTargetWord();
+      Assert.That(word, Is.EqualTo("PIG"));
     }
     
     [Test]
-    public void SubmitGuess_GuessLowercaseA_ReturnsSetContainingLowercaseA()
+    public void SubmitGuess_GuessUppercaseA_ReturnsSetContainingUppercaseA()
     {
-      _game.SubmitGuess('a');
-      var guesses = _game.GetGuesses();
-      Assert.That(guesses, Contains.Item('a'));
+      _game.SubmitGuess(new Guess('A'));
+      var guess = _game.GetGuesses().First();
+      Assert.That(guess.Character, Is.EqualTo('A'));
     }
     
     [Test]
-    public void SubmitGuess_GuessCapitalA_ReturnsSetContainingLowercaseA()
+    public void SubmitGuess_GuessLowercaseA_ReturnsSetContainingUppercaseA()
     {
-      _game.SubmitGuess('A');
-      var guesses = _game.GetGuesses();
-      Assert.That(guesses, Contains.Item('a'));
+      _game.SubmitGuess(new Guess('a'));
+      var guess = _game.GetGuesses().First();
+      Assert.That(guess.Character, Is.EqualTo('A'));
     }
     
     [Test]
     public void GetGuessesRemaining_OneWrongGuessSubmitted_ReturnsMaxLivesMinusOne()
     {
-      _game.SetWord("pig");
-      _game.SubmitGuess('a');
+      _game.SubmitGuess(new Guess('a'));
       var guessesRemaining = _game.GetGuessesRemaining();
       Assert.That(guessesRemaining, Is.EqualTo(6));
     }
@@ -56,8 +55,7 @@ namespace Hangman.Tests.Models
     [Test]
     public void GetGuessesRemaining_OneRightGuessSubmitted_ReturnsMaxLives()
     {
-      _game.SetWord("pig");
-      _game.SubmitGuess('p');
+      _game.SubmitGuess(new Guess('p'));
       var guessesRemaining = _game.GetGuessesRemaining();
       Assert.That(guessesRemaining, Is.EqualTo(7));
     }
@@ -65,10 +63,9 @@ namespace Hangman.Tests.Models
     [Test]
     public void IsWon_AllCharactersGuessed_ReturnsTrue()
     {
-      _game.SetWord("pig");
-      _game.SubmitGuess('p');
-      _game.SubmitGuess('i');
-      _game.SubmitGuess('g');
+      _game.SubmitGuess(new Guess('p'));
+      _game.SubmitGuess(new Guess('i'));
+      _game.SubmitGuess(new Guess('g'));
       var isWon = _game.IsWon();
       Assert.That(isWon, Is.True);
       Assert.That(_game.IsInPlay(), Is.False);
@@ -77,8 +74,7 @@ namespace Hangman.Tests.Models
     [Test]
     public void IsWon_NotAllCharactersGuessed_ReturnsFalse()
     {
-      _game.SetWord("pig");
-      _game.SubmitGuess('a');
+      _game.SubmitGuess(new Guess('a'));
       var isWon = _game.IsWon();
       Assert.That(isWon, Is.False);
     }
@@ -86,8 +82,7 @@ namespace Hangman.Tests.Models
     [Test]
     public void IsLost_GuessesLeft_ReturnsFalse()
     {
-      _game.SetWord("pig");
-      _game.SubmitGuess('a');
+      _game.SubmitGuess(new Guess('a'));
       var isLost = _game.IsLost();
       Assert.That(isLost, Is.False);
     }
@@ -95,14 +90,13 @@ namespace Hangman.Tests.Models
     [Test]
     public void IsLost_NoGuessesLeft_ReturnsTrue()
     {
-      _game.SetWord("pig");
-      _game.SubmitGuess('a');
-      _game.SubmitGuess('b');
-      _game.SubmitGuess('c');
-      _game.SubmitGuess('d');
-      _game.SubmitGuess('e');
-      _game.SubmitGuess('f');
-      _game.SubmitGuess('h');
+      _game.SubmitGuess(new Guess('a'));
+      _game.SubmitGuess(new Guess('b'));
+      _game.SubmitGuess(new Guess('c'));
+      _game.SubmitGuess(new Guess('d'));
+      _game.SubmitGuess(new Guess('e'));
+      _game.SubmitGuess(new Guess('f'));
+      _game.SubmitGuess(new Guess('h'));
       var isLost = _game.IsLost();
       Assert.That(isLost, Is.True);
       Assert.That(_game.IsInPlay(), Is.False);
@@ -111,59 +105,9 @@ namespace Hangman.Tests.Models
     [Test]
     public void IsInPlay_NotWonGuessesLeft_ReturnsTrue()
     {
-      _game.SetWord("pig");
-      _game.SubmitGuess('a');
+      _game.SubmitGuess(new Guess('a'));
       var inPlay = _game.IsInPlay();
       Assert.That(inPlay, Is.True);
-    }
-
-    [Test]
-    public void IsValidGuess_SingleCharacter_ReturnsValidGuess()
-    {
-      var result = _game.IsValidGuess("a", out _);
-      Assert.That(result, Is.EqualTo(GuessResult.Valid));
-    }
-
-    [Test]
-    public void IsValidGuess_TwoCharacters_ReturnsInvalidGuess()
-    {
-      var result = _game.IsValidGuess("aa", out _);
-      Assert.That(result, Is.EqualTo(GuessResult.Invalid));
-    }
-
-    [Test]
-    public void IsValidGuess_Number_ReturnsInvalidGuess()
-    {
-      var result = _game.IsValidGuess("1", out _);
-      Assert.That(result, Is.EqualTo(GuessResult.Invalid));
-    }
-
-    [Test]
-    public void IsValidGuess_Comma_ReturnsInvalidGuess()
-    {
-      var result = _game.IsValidGuess(",", out _);
-      Assert.That(result, Is.EqualTo(GuessResult.Invalid));
-    }
-
-    [Test]
-    public void IsValidGuess_EmptyGuess_ReturnsInvalidGuess()
-    {
-      var result = _game.IsValidGuess("", out _);
-      Assert.That(result, Is.EqualTo(GuessResult.Invalid));
-    }
-
-    [Test]
-    public void IsValidGuess_Whitespace_ReturnsInvalidGuess()
-    {
-      var result = _game.IsValidGuess(" ", out _);
-      Assert.That(result, Is.EqualTo(GuessResult.Invalid));
-    }
-
-    [Test]
-    public void IsValidGuess_Null_ReturnsInvalidGuess()
-    {
-      var result = _game.IsValidGuess(null, out _);
-      Assert.That(result, Is.EqualTo(GuessResult.Invalid));
     }
   }
 }
