@@ -9,21 +9,14 @@ namespace Hangman.Models
   {
     private const int MaxLives = 7;
 
-    private HashSet<Guess> _guesses;
+    private readonly HashSet<Guess> _guesses;
+    private IEnumerable<Guess> GuessesList => new List<Guess>(_guesses);
+    private string TargetWord { get; }
 
     public Game(string targetWord)
     {
       TargetWord = targetWord;
-
       _guesses = new HashSet<Guess>();
-    }
-
-    public string TargetWord { get; set; }
-
-    public IEnumerable<Guess> Guesses
-    {
-      get => new List<Guess>(_guesses);
-      set => _guesses = new HashSet<Guess>(value);
     }
 
     public string GetTargetWord()
@@ -70,7 +63,7 @@ namespace Hangman.Models
       {
         var letter = TargetWord[i];
 
-        result[i] = Guesses.Select(g => g.Character).Contains(letter) ? letter : default;
+        result[i] = GuessesList.Select(g => g.Character).Contains(letter) ? letter : default;
       }
 
       return result;

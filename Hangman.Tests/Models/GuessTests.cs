@@ -40,5 +40,19 @@ namespace Hangman.Tests.Models
       var guess = new Guess('a');
       Assert.That(guess.Character, Is.EqualTo('A'));
     }
+
+    [Test]
+    public void NewGuess_UppercaseA_ReturnsGuessContainingUppercaseA()
+    {
+      var guess = new Guess('A');
+      Assert.That(guess.Character, Is.EqualTo('A'));
+    }
+    
+    [Test]
+    public void Guess_LowercaseA_ReturnsGuessContainingUppercaseA()
+    {
+      var guess = new Guess('a');
+      Assert.That(guess.Character, Is.EqualTo('A'));
+    }
   }
 }
