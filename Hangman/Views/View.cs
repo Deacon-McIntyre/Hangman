@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Hangman.Models;
@@ -26,33 +27,47 @@ namespace Hangman.Views
 
     public void DisplayGameState()
     {
-      var guessesRemaining = _game.GetGuessesRemaining();
-      var answer = _game.GetWord();
-      var guessesSoFar = _game.GetGuesses();
-
       var stringBuilder = new StringBuilder();
-
-      foreach (var character in answer)
-      {
-        stringBuilder.Append(guessesSoFar.Contains(character) ? character : '_');
-      }
-
-      stringBuilder.Append($" | You have {guessesRemaining} lives left");
-
-      var incorrectGuesses = string.Join(", ", guessesSoFar.Except(answer));
-
-      if (!string.IsNullOrEmpty(incorrectGuesses))
-      {
-        stringBuilder.Append($" | Incorrect guesses so far: {incorrectGuesses}");
-      }
+      
+      AppendAnswerProgress(stringBuilder);
+      AppendLivesLeft(stringBuilder);
+      AppendIncorrectGuesses(stringBuilder);
 
       Console.WriteLine(stringBuilder.ToString());
     }
 
-    public string AskForGuess()
+    private void AppendAnswerProgress(StringBuilder sb)
+    {
+      var filledOutAnswer = _game.GetFilledOutAnswer();
+
+      foreach (var character in filledOutAnswer)
+      {
+        sb.Append(character != default ? character : '_');
+      }
+    }
+
+    private void AppendLivesLeft(StringBuilder sb)
+    {
+      int guessesRemaining = _game.GetGuessesRemaining();
+      sb.Append($" | You have {guessesRemaining} lives left");
+    }
+
+    private void AppendIncorrectGuesses(StringBuilder sb)
+    {
+      var incorrectGuesses = string.Join(", ",  _game.GetInvalidGuesses().Select(g => g.Character));
+
+      if (!string.IsNullOrEmpty(incorrectGuesses))
+      {
+        sb.Append($" | Incorrect guesses so far: {incorrectGuesses}");
+      }
+    }
+
+    public Guess AskForGuess()
     {
       Console.WriteLine("Guess a character: ");
-      return Console.ReadLine();
+      char character = Console.ReadKey(true).KeyChar;
+
+      return new Guess(character);
     }
 
     public void DisplayInvalidGuess()
@@ -70,7 +85,7 @@ namespace Hangman.Views
       if (_game.IsLost())
       {
         Console.WriteLine("You lost :(");
-        Console.WriteLine($"The word was {_game.GetWord()}");
+        Console.WriteLine($"The word was {_game.GetTargetWord()}");
       }
     }
 

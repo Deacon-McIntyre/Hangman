@@ -1,38 +1,37 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Hangman.Framework.Models;
 
 namespace Hangman.Models
 {
-  public class Game
+  public class Game : BasePersistable
   {
     private const int MaxLives = 7;
-    private string _word;
-    private readonly HashSet<char> _guesses;
 
-    public Game()
+    private readonly HashSet<Guess> _guesses;
+    private IEnumerable<Guess> GuessesList => new List<Guess>(_guesses);
+    private string TargetWord { get; }
+
+    public Game(string targetWord)
     {
-      _guesses = new HashSet<char>();
+      TargetWord = targetWord;
+      _guesses = new HashSet<Guess>();
     }
 
-    public string GetWord()
+    public string GetTargetWord()
     {
-      return _word;
-    }
-
-    public void SetWord(string word)
-    {
-      _word = word;
+      return TargetWord;
     }
 
     public bool IsWon()
     {
-      return _word.All(character => _guesses.Contains(character));
+      return TargetWord.All(character => _guesses.Any(g => g.Character == character));
     }
 
     public bool IsLost()
     {
-      return !IsWon() && GetGuessesRemaining() == 0;
+      return GetGuessesRemaining() == 0;
     }
 
     public bool IsInPlay()
@@ -40,43 +39,56 @@ namespace Hangman.Models
       return !IsWon() && !IsLost();
     }
 
-    public GuessResult IsValidGuess(string guess, out char validChar)
+    public bool HasAlreadyBeenGuessed(Guess guess)
     {
-      if (char.TryParse(guess, out var guessChar) && char.IsLetter(guessChar))
-      {
-        validChar = guessChar;
-        return _guesses.Contains(guessChar) ? GuessResult.Duplicate : GuessResult.Valid;
-      }
-      else
-      {
-        validChar = default;
-        return GuessResult.Invalid;
-      }
+      return _guesses.Any(g => g.Character == guess.Character);
     }
 
-    public void SubmitGuess(char guess)
+    public void SubmitGuess(Guess guess)
     {
-      var lowercaseGuess = char.ToLower(guess);
-      _guesses.Add(lowercaseGuess);
+      _guesses.Add(guess);
     }
 
     public int GetGuessesRemaining()
     {
-      var invalidCount = 0;
-      foreach (var guess in _guesses)
+      var invalidCount = _guesses.Count(g => !TargetWord.Contains(g.Character));
+
+      return MaxLives - invalidCount;
+    }
+    
+    public char[] GetFilledOutAnswer()
+    {
+      var result = new char[TargetWord.Length];
+      for (var i = 0; i < TargetWord.Length; i++)
       {
-        if (!_word.Contains(guess))
-        {
-          invalidCount++;
-        }
+        var letter = TargetWord[i];
+
+        result[i] = GuessesList.Select(g => g.Character).Contains(letter) ? letter : default;
       }
 
-      return Math.Max(0, MaxLives - invalidCount);
+      return result;
     }
 
-    public HashSet<char> GetGuesses()
+    public IEnumerable<Guess> GetInvalidGuesses()
     {
-      return _guesses;
+      return _guesses.Where(g => !TargetWord.Contains(g.Character));
+    }
+
+    public void HandlePersistence()
+    {
+      if (!IsInPlay())
+      {
+        Reset();
+      }
+      else
+      {
+        Save();
+      }
+    }
+
+    public static Game LoadExisting()
+    {
+      return Load<Game>();
     }
   }
 }
